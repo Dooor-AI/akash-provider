@@ -4,6 +4,8 @@ version: "2.0"
 services:
   web:
     image: quay.io/ovrclk/demo-app
+    params:
+      dooor_tee: true
     expose:
       - port: 80
         as: 80

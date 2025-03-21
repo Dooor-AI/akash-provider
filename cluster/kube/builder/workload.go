@@ -174,6 +174,13 @@ func (b *Workload) container() corev1.Container {
 		})
 	}
 
+	b.log.Info("!!!!!!!! VERIFYING PARAMS !!!!!!!!!!!")
+	if service.Params != nil {
+        if val, ok := service.Params["dooor_tee"]; ok {
+            b.log.Info("!!!!! Dooor tee param was set !!!!!!!", "value", val)
+        }
+    }
+
 	return kcontainer
 }
 
