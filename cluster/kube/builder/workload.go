@@ -156,6 +156,10 @@ func (b *Workload) container() corev1.Container {
 	}
 
 	envVarsAdded := make(map[string]int)
+	var dooorTee bool
+
+	b.log.Info("!!!!!!!! VERIFYING PARAMS !!!!!!!!!!!")
+
 	for _, env := range service.Env {
 		parts := strings.SplitN(env, "=", 2)
 		switch len(parts) {
@@ -168,18 +172,15 @@ func (b *Workload) container() corev1.Container {
 	}
 	kcontainer.Env = b.addEnvVarsForDeployment(envVarsAdded, kcontainer.Env)
 
+	if dooorTee {
+		b.log.Info("!!!!! DOOOR_TEE was set to true in env !!!!!")
+	}
+
 	for _, expose := range service.Expose {
 		kcontainer.Ports = append(kcontainer.Ports, corev1.ContainerPort{
 			ContainerPort: int32(expose.Port), // nolint: gosec
 		})
 	}
-
-	b.log.Info("!!!!!!!! VERIFYING PARAMS !!!!!!!!!!!")
-	if service.Params != nil {
-        if val, ok := service.Params["dooor_tee"]; ok {
-            b.log.Info("!!!!! Dooor tee param was set !!!!!!!", "value", val)
-        }
-    }
 
 	return kcontainer
 }
