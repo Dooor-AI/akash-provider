@@ -165,6 +165,10 @@ func (b *Workload) container() corev1.Container {
 		switch len(parts) {
 		case 2:
 			kcontainer.Env = append(kcontainer.Env, corev1.EnvVar{Name: parts[0], Value: parts[1]})
+			if parts[0] == "DOOOR_TEE" && strings.ToLower(parts[1]) == "true" {
+				b.log.Info("DOOOR_TEE was set to true in env!", "value", parts[1])
+				dooorTee = true
+			}	
 		case 1:
 			kcontainer.Env = append(kcontainer.Env, corev1.EnvVar{Name: parts[0]})
 		}
