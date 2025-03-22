@@ -68,6 +68,48 @@ func (b *Workload) NS() string {
 	return LidNS(b.deployment.LeaseID())
 }
 
+func boolPtr(b bool) *bool {
+    return &b
+}
+
+func (b *Workload) containers() []corev1.Container {
+    // 1. Obtemos o contêiner "principal" igual a container()
+    mainCtr := b.container() // container principal
+
+    // 2. Verificar DOOOR_TEE nas env
+    service := &b.deployment.ManifestGroup().Services[b.serviceIdx]
+    dooorTee := false
+
+    for _, envLine := range service.Env {
+        if strings.HasPrefix(envLine, "DOOOR_TEE=") {
+            parts := strings.SplitN(envLine, "=", 2)
+            if len(parts) == 2 && strings.EqualFold(parts[1], "true") {
+                dooorTee = true
+            }
+        }
+    }
+
+    // 3. Montamos um slice de containers
+    ctrs := []corev1.Container{ mainCtr }
+
+    // 4. Se dooorTee == true, criamos sidecar e add
+    if dooorTee {
+        sidecar := corev1.Container{
+            Name:  "sidecar-tee",
+            Image: "brunolaureano/tee-go-api:v1.0.0", // Exemplo
+            SecurityContext: &corev1.SecurityContext{
+                // se precisar manipular /dev/tpm0
+                Privileged: boolPtr(true),
+            },
+            // se quiser volumeMount p/ /dev/tpm0 => ver adiante
+        }
+        ctrs = append(ctrs, sidecar)
+    }
+
+    return ctrs
+}
+
+
 func (b *Workload) container() corev1.Container {
 	falseValue := false
 
