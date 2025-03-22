@@ -101,7 +101,14 @@ func (b *Workload) containers() []corev1.Container {
                 // se precisar manipular /dev/tpm0
                 Privileged: boolPtr(true),
             },
-            // se quiser volumeMount p/ /dev/tpm0 => ver adiante
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      "tpm-device",
+					MountPath: "/dev/tpmrm0",
+				},
+			},
+			// ImagePullPolicy: corev1.PullAlways,
+            // se quiser volumeMount p/ /dev/tpm0
         }
         ctrs = append(ctrs, sidecar)
     }
@@ -231,6 +238,19 @@ func (b *Workload) container() corev1.Container {
 	return kcontainer
 }
 
+func (b *Workload) shouldInjectTPM() bool {
+	service := &b.deployment.ManifestGroup().Services[b.serviceIdx]
+	for _, envLine := range service.Env {
+		if strings.HasPrefix(envLine, "DOOOR_TEE=") {
+			parts := strings.SplitN(envLine, "=", 2)
+			if len(parts) == 2 && strings.EqualFold(parts[1], "true") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // Return RAM volumes
 func (b *Workload) volumes() []corev1.Volume {
 	var volumes []corev1.Volume // nolint:prealloc
@@ -258,6 +278,21 @@ func (b *Workload) volumes() []corev1.Volume {
 				EmptyDir: &corev1.EmptyDirVolumeSource{
 					Medium:    corev1.StorageMediumMemory,
 					SizeLimit: &size,
+				},
+			},
+		})
+	}
+
+	if b.shouldInjectTPM() {
+		volumes = append(volumes, corev1.Volume{
+			Name: "tpm-device",
+			VolumeSource: corev1.VolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: "/dev/tpmrm0",
+					Type: func() *corev1.HostPathType {
+						t := corev1.HostPathFile
+						return &t
+					}(),
 				},
 			},
 		})
