@@ -108,14 +108,10 @@ func (b *Workload) containers() []corev1.Container {
 				},
 			},
 			Env: []corev1.EnvVar{
-				// {
-				// 	Name:  "TPM_DEVICE",
-				// 	Value: "/dev/tpmrm0",
-				// },
 				{
 					Name:  "TPM2TOOLS_TCTI",
 					Value: "device:/dev/tpmrm0",
-				}
+				},
 			},
 			// ImagePullPolicy: corev1.PullAlways,
             // se quiser volumeMount p/ /dev/tpm0
@@ -125,7 +121,6 @@ func (b *Workload) containers() []corev1.Container {
 
     return ctrs
 }
-
 
 func (b *Workload) container() corev1.Container {
 	falseValue := false
