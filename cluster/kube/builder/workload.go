@@ -290,7 +290,7 @@ func (b *Workload) volumes() []corev1.Volume {
 				HostPath: &corev1.HostPathVolumeSource{
 					Path: "/dev/tpmrm0",
 					Type: func() *corev1.HostPathType {
-						t := corev1.HostPathFile
+						t := corev1.HostPathCharDev
 						return &t
 					}(),
 				},
