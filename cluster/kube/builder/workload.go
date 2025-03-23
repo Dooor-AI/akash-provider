@@ -107,6 +107,16 @@ func (b *Workload) containers() []corev1.Container {
 					MountPath: "/dev/tpmrm0",
 				},
 			},
+			Env: []corev1.EnvVar{
+				// {
+				// 	Name:  "TPM_DEVICE",
+				// 	Value: "/dev/tpmrm0",
+				// },
+				{
+					Name:  "TPM2TOOLS_TCTI",
+					Value: "device:/dev/tpmrm0",
+				}
+			},
 			// ImagePullPolicy: corev1.PullAlways,
             // se quiser volumeMount p/ /dev/tpm0
         }
