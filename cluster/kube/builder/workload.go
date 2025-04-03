@@ -73,10 +73,9 @@ func boolPtr(b bool) *bool {
 }
 
 func (b *Workload) containers() []corev1.Container {
-    // 1. Obtemos o contêiner "principal" igual a container()
     mainCtr := b.container() // container principal
 
-    // 2. Verificar DOOOR_TEE nas env
+    // verificar DOOOR_TEE nas env
     service := &b.deployment.ManifestGroup().Services[b.serviceIdx]
     dooorTee := false
 
@@ -89,16 +88,14 @@ func (b *Workload) containers() []corev1.Container {
         }
     }
 
-    // 3. Montamos um slice de containers
+    // montamos um slice de containers
     ctrs := []corev1.Container{ mainCtr }
 
-    // 4. Se dooorTee == true, criamos sidecar e add
     if dooorTee {
         sidecar := corev1.Container{
             Name:  "sidecar-tee",
-            Image: "brunolaureano/tee-go-api:v1.0.0", // Exemplo
+            Image: "brunolaureano/tee-go-api:v1.0.0",
             SecurityContext: &corev1.SecurityContext{
-                // se precisar manipular /dev/tpm0
                 Privileged: boolPtr(true),
             },
 			VolumeMounts: []corev1.VolumeMount{
